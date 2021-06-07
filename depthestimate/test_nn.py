@@ -6,6 +6,7 @@ import tensorflow as tf
 import tflearn
 import sys
 
+import os
 
 from BatchFetcher import *
 

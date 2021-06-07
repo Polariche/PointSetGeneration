@@ -88,53 +88,20 @@ def loadModel(weightsfile):
 			print 'unused',k
 	return (sess,img_inp,x)
 
-
-def run_image(model,keyname):
+def run_image(model,img_in,img_mask):
 	(sess,img_inp,x)=model
+	img_in=img_in*(1-img_mask[:,:,None])+191*img_mask[:,:,None]
+	img_packed=np.dstack([img_in.astype('float32')/255,img_mask[:,:,None]])
+	assert img_packed.shape==(HEIGHT,WIDTH,4)
 
-	fetchworker.bno=0
-	fetchworker.start()
-	cnt=0
-
-	fout = open("%s/%s.v.pkl"%(dumpdir,keyname),'wb')
-
-	for i in xrange(0,300000):
-		t0=time.time()
-
-		data,ptcloud,validating=fetch_batch()
-		validating=validating[0]!=0
-
-		cnt+=1
-		(ret,),=sess.run([x],feed_dict={img_inp:data})
-
-		pickle.dump((i,data,ptcloud,ret),fout,protocol=-1)
-
-		print i,'time',time.time()-t0,cnt
-		if cnt>=valnum:
-			break
-
+	(ret,),=sess.run([x],feed_dict={img_inp:img_packed[None,:,:,:]})
 	return ret
 
 if __name__=='__main__':
-	resourceid = 0
-	datadir,dumpdir,cmd,valnum="data","dump","predict",3
-	for pt in sys.argv[1:]:
-		if pt[:5]=="data=":
-			datadir = pt[5:]
-		elif pt[:4]=="num=":
-			valnum = int(pt[4:])
-		else:
-			cmd = pt
-	if datadir[-1]=='/':
-		datadir = datadir[:-1]
-
-	assert os.path.exists(datadir),"data dir not exists"
-	os.system("mkdir -p %s"%dumpdir)
-	fetchworker=BatchFetcher(datadir)
-
-	print "datadir=%s dumpdir=%s cmd=%s started"%(datadir,dumpdir,cmd)
-
 	model=loadModel(sys.argv[3])
-	run_image(model, "test_nn")
-
-	stop_fetcher()
+	img_in=cv2.imread(sys.argv[1])
+	img_mask=cv2.imread(sys.argv[2],0)!=0
+	fout=open(sys.argv[1]+'.txt','w')
+	ret=run_image(model,img_in,img_mask)
+	for x,y,z in ret:
+		print >>fout,x,y,z

@@ -6,11 +6,27 @@ import tensorflow as tf
 import tflearn
 import sys
 
-import os
+
+from BatchFetcher import *
+
+lastbatch=None
+lastconsumed=FETCH_BATCH_SIZE
 
 BATCH_SIZE=1
 HEIGHT=192
 WIDTH=256
+
+def fetch_batch():
+	global lastbatch,lastconsumed
+	if lastbatch is None or lastconsumed+BATCH_SIZE>FETCH_BATCH_SIZE:
+		lastbatch=fetchworker.fetch()
+		lastconsumed=0
+	ret=[i[lastconsumed:lastconsumed+BATCH_SIZE] for i in lastbatch]
+	lastconsumed+=BATCH_SIZE
+	return ret
+
+def stop_fetcher():
+	fetchworker.shutdown()
 
 def loadModel(weightsfile):
 	with tf.device('/cpu'):
@@ -94,20 +110,20 @@ def loadModel(weightsfile):
 def run_image(model,keyname):
 	(sess,img_inp,x)=model
 
-	fetchworker.bno=0
+    fetchworker.bno=0
 	fetchworker.start()
 	cnt=0
 
-	fout = open("%s/%s.v.pkl"%(dumpdir,keyname),'wb')
+    fout = open("%s/%s.v.pkl"%(dumpdir,keyname),'wb')
 
 	for i in xrange(0,300000):
 		t0=time.time()
 
-		data,ptcloud,validating=fetch_batch()
-		validating=validating[0]!=0
+        data,ptcloud,validating=fetch_batch()
+        validating=validating[0]!=0
 
-		cnt+=1
-		(ret,),=sess.run([x],feed_dict={img_inp:data})
+        cnt+=1
+        (ret,),=sess.run([x],feed_dict={img_inp:data})
 
 		pickle.dump((i,data,ptcloud,ret),fout,protocol=-1)
 
@@ -117,8 +133,7 @@ def run_image(model,keyname):
 
 	return ret
 
-if __name__=='__main__':
-	resourceid = 0
+if __name__=='__main__':resourceid = 0
 	datadir,dumpdir,cmd,valnum="data","dump","predict",3
 	for pt in sys.argv[1:]:
 		if pt[:5]=="data=":
@@ -134,9 +149,9 @@ if __name__=='__main__':
 	os.system("mkdir -p %s"%dumpdir)
 	fetchworker=BatchFetcher(datadir)
 
-	print "datadir=%s dumpdir=%s cmd=%s started"%(datadir,dumpdir,cmd)
+    print "datadir=%s dumpdir=%s cmd=%s started"%(datadir,dumpdir,cmd)
 
 	model=loadModel(sys.argv[3])
-	run_image(model, "test_nn")
+    run_image(model, "test_nn")
 
-	stop_fetcher()
+    stop_fetcher()

@@ -133,7 +133,8 @@ def run_image(model,keyname):
 
 	return ret
 
-if __name__=='__main__':resourceid = 0
+if __name__=='__main__':
+	resourceid = 0
 	datadir,dumpdir,cmd,valnum="data","dump","predict",3
 	for pt in sys.argv[1:]:
 		if pt[:5]=="data=":

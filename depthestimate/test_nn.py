@@ -110,20 +110,20 @@ def loadModel(weightsfile):
 def run_image(model,keyname):
 	(sess,img_inp,x)=model
 
-    fetchworker.bno=0
+	fetchworker.bno=0
 	fetchworker.start()
 	cnt=0
 
-    fout = open("%s/%s.v.pkl"%(dumpdir,keyname),'wb')
+	fout = open("%s/%s.v.pkl"%(dumpdir,keyname),'wb')
 
 	for i in xrange(0,300000):
 		t0=time.time()
 
-        data,ptcloud,validating=fetch_batch()
-        validating=validating[0]!=0
+		data,ptcloud,validating=fetch_batch()
+		validating=validating[0]!=0
 
-        cnt+=1
-        (ret,),=sess.run([x],feed_dict={img_inp:data})
+		cnt+=1
+		(ret,),=sess.run([x],feed_dict={img_inp:data})
 
 		pickle.dump((i,data,ptcloud,ret),fout,protocol=-1)
 
@@ -149,9 +149,9 @@ if __name__=='__main__':resourceid = 0
 	os.system("mkdir -p %s"%dumpdir)
 	fetchworker=BatchFetcher(datadir)
 
-    print "datadir=%s dumpdir=%s cmd=%s started"%(datadir,dumpdir,cmd)
+	print "datadir=%s dumpdir=%s cmd=%s started"%(datadir,dumpdir,cmd)
 
 	model=loadModel(sys.argv[3])
-    run_image(model, "test_nn")
+	run_image(model, "test_nn")
 
-    stop_fetcher()
+	stop_fetcher()

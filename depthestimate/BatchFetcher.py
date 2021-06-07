@@ -11,7 +11,7 @@ import threading
 import Queue
 import sys
 import cPickle as pickle
-import show3d
+#import show3d
 
 FETCH_BATCH_SIZE=32
 BATCH_SIZE=32
@@ -83,6 +83,7 @@ if __name__=='__main__':
 	fetchworker = BatchFetcher(dataname)
 	fetchworker.bno=0
 	fetchworker.start()
+	"""
 	for cnt in xrange(100):
 		data,ptcloud,validating = fetchworker.fetch()
 		validating = validating[0]!=0
@@ -97,5 +98,6 @@ if __name__=='__main__':
 					break
 			if cmd==ord('q'):
 				break
+	"""
 
 

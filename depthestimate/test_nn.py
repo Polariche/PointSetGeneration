@@ -5,7 +5,17 @@ import cPickle as pickle
 import tensorflow as tf
 import tflearn
 import sys
-
+import random
+import math
+import os
+os.system("chmod +w /unsullied/sharefs/wangmengdi/wangmengdi")
+import time
+import zlib
+import socket
+import threading
+import Queue
+import sys
+import cPickle as pickle
 
 from BatchFetcher import *
 

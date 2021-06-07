@@ -6,6 +6,8 @@ import tensorflow as tf
 import tflearn
 import sys
 
+import os
+
 BATCH_SIZE=1
 HEIGHT=192
 WIDTH=256
